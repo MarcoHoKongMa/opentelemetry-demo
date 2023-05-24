@@ -717,6 +717,141 @@ services:
     #   - 
     logging: *logging
 
+  # Grafana Agent
+  agent:
+    image: grafana/agent:latest
+    container_name: grafana-agent
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    restart: unless-stopped
+    volumes:
+      - ./src/grafana-agent/agent.yaml:/etc/agent.yaml
+
+  # *****
+  # Grafana Tempo
+  # *****
+  # Distributor
+  distributor:
+    image: grafana/tempo:latest
+    container_name: tempo-distributor
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    restart: unless-stopped
+    command: [ "-target=distributor", "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./src/tempo/tempo.yaml:/etc/tempo.yaml
+      - ~/.config/gcloud/application_default_credentials.json:/root/.config/gcloud/application_default_credentials.json
+    ports:
+      - "3200"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
+
+  ingester-0:
+    image: grafana/tempo:latest
+    container_name: tempo-ingester0
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    restart: unless-stopped
+    command: [ "-target=ingester", "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./src/tempo/tempo.yaml:/etc/tempo.yaml
+      - ~/.config/gcloud/application_default_credentials.json:/root/.config/gcloud/application_default_credentials.json
+    ports:
+      - "3200"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
+  
+  ingester-1:
+    image: grafana/tempo:latest
+    container_name: tempo-ingester1
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    restart: unless-stopped
+    command: [ "-target=ingester", "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./src/tempo/tempo.yaml:/etc/tempo.yaml
+      - ~/.config/gcloud/application_default_credentials.json:/root/.config/gcloud/application_default_credentials.json
+    ports:
+      - "3200"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
+  
+  ingester-2:
+    image: grafana/tempo:latest
+    container_name: tempo-ingester2
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    restart: unless-stopped
+    command: [ "-target=ingester", "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./src/tempo/tempo.yaml:/etc/tempo.yaml
+      - ~/.config/gcloud/application_default_credentials.json:/root/.config/gcloud/application_default_credentials.json
+    ports:
+      - "3200"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
+
+  query-frontend:
+    image: grafana/tempo:latest
+    container_name: tempo-query-frontend
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    restart: unless-stopped
+    command: [ "-target=query-frontend", "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./src/tempo/tempo.yaml:/etc/tempo.yaml
+      - ~/.config/gcloud/application_default_credentials.json:/root/.config/gcloud/application_default_credentials.json
+    ports:
+      - "3200:3200"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
+
+  querier:
+    image: grafana/tempo:latest
+    container_name: tempo-querier
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    restart: unless-stopped
+    command: [ "-target=querier", "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./src/tempo/tempo.yaml:/etc/tempo.yaml
+      - ~/.config/gcloud/application_default_credentials.json:/root/.config/gcloud/application_default_credentials.json
+    ports:
+      - "3200"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
+
+  compactor:
+    image: grafana/tempo:latest
+    container_name: tempo-compactor
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    restart: unless-stopped
+    command: [ "-target=compactor", "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./src/tempo/tempo.yaml:/etc/tempo.yaml
+      - ~/.config/gcloud/application_default_credentials.json:/root/.config/gcloud/application_default_credentials.json
+    ports:
+      - "3200"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
+
   # *****
   # Tests
   # *****

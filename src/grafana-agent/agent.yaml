@@ -1,0 +1,18 @@
+tempo:
+  configs:
+  - name: default
+    recievers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+            cors:
+              allowed_origins:
+                - "http://*"
+                - "https://*"
+    remote_write:
+    - endpoint: http://tempo-ingester0:3200/api/prom/push
+      sending_queue:
+        queue_size: 10000
+      retry_on_failure:
+        max_elapsed_time: 10s

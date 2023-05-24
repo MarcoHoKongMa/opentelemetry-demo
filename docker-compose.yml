@@ -717,6 +717,113 @@ services:
     #   - 
     logging: *logging
 
+  # MySQL Management Node
+  ndb_mgmd:
+    image: mysql/mysql-cluster:7.6.25
+    container_name: management1
+    networks:
+      default:
+        ipv4_address: 10.0.255.2
+    deploy:
+      resources:
+        limits:
+          memory: 500M
+    restart: unless-stopped
+    command: [ "ndb_mgmd" ]
+    volumes:
+      - ./src/mysql-cluster/my.cnf:/etc/my.cnf
+      - ./src/mysql-cluster/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+      - ndb-management:/var/lib/mysql
+
+  # MySQL Data Nodes
+  ndb1:
+    image: mysql/mysql-cluster:7.6.25
+    container_name: ndb1
+    networks:
+      default:
+        ipv4_address: 10.0.255.3
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+    restart: unless-stopped
+    command: [ "ndbd" ]
+    volumes:
+      - ./src/mysql-cluster/my.cnf:/etc/my.cnf
+      - ./src/mysql-cluster/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+      - ndb-data1:/var/lib/mysql
+
+  ndb2:
+    image: mysql/mysql-cluster:7.6.25
+    container_name: ndb2
+    networks:
+      default:
+        ipv4_address: 10.0.255.4
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+    restart: unless-stopped
+    command: [ "ndbd" ]
+    volumes:
+      - ./src/mysql-cluster/my.cnf:/etc/my.cnf
+      - ./src/mysql-cluster/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+      - ndb-data2:/var/lib/mysql
+
+  ndb3:
+    image: mysql/mysql-cluster:7.6.25
+    container_name: ndb3
+    networks:
+      default:
+        ipv4_address: 10.0.255.5
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+    restart: unless-stopped
+    command: [ "ndbd" ]
+    volumes:
+      - ./src/mysql-cluster/my.cnf:/etc/my.cnf
+      - ./src/mysql-cluster/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+      - ndb-data3:/var/lib/mysql
+
+  ndb4:
+    image: mysql/mysql-cluster:7.6.25
+    container_name: ndb4
+    networks:
+      default:
+        ipv4_address: 10.0.255.6
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+    restart: unless-stopped
+    command: [ "ndbd" ]
+    volumes:
+      - ./src/mysql-cluster/my.cnf:/etc/my.cnf
+      - ./src/mysql-cluster/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+      - ndb-data4:/var/lib/mysql
+
+  # MySQL Server Node
+  mysqld:
+    image: mysql/mysql-cluster:7.6.25
+    container_name: mysql1
+    networks:
+      default:
+        ipv4_address: 10.0.255.10
+    deploy:
+      resources:
+        limits:
+          memory: 500M
+    restart: unless-stopped
+    command: [ "mysqld" ]
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+    volumes:
+      - ./src/mysql-cluster/my.cnf:/etc/my.cnf
+      - ./src/mysql-cluster/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+      - ndb-sql1:/var/lib/mysql
+
   # *****
   # Tests
   # *****
@@ -774,4 +881,16 @@ volumes:
   grafana-storage:
     driver: local
   prometheus-storage:
+    driver: local
+  ndb-management:
+    driver: local
+  ndb-data1:
+    driver: local
+  ndb-data2:
+    driver: local
+  ndb-data3:
+    driver: local
+  ndb-data4:
+    driver: local
+  ndb-sql1:
     driver: local

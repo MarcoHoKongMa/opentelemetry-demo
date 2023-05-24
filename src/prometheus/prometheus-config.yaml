@@ -15,3 +15,6 @@ scrape_configs:
   static_configs:
   - targets:
     - 'otelcol:8888'
+- job_name: 'mysql'
+  static_configs:
+  - targets: ['mysqld_exporter:9104']

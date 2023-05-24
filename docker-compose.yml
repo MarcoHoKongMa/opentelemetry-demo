@@ -708,13 +708,40 @@ services:
     ports:
       - "9411:9411"
     environment:
-      - STORAGE_TYPE=mem
+      - STORAGE_TYPE=mysql
       - JAVA_OPTS=-Xms500m -Xmx500m -XX:+ExitOnOutOfMemoryError
-      # - MYSQL_USER=root
-      # - MYSQL_PASS=my-secret-pw
-      # - MYSQL_HOST=10.0.255.10
-    # depends_on:
-    #   - 
+      - MYSQL_USER=root
+      - MYSQL_PASS=my-secret-pw
+      - MYSQL_HOST=10.0.255.10
+    depends_on:
+      - ndb_mgmd
+      - ndb1
+      - ndb2
+      - ndb3
+      - ndb4
+      - mysqld
+    logging: *logging
+
+  # MySQL Exporter for Prometheus
+  mysqld_exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: mysqld_exporter
+    deploy:
+      resources:
+        limits:
+          memory: 50M
+    restart: unless-stopped
+    command: [ "--collect.info_schema.processlist", "--collect.info_schema.innodb_metrics", "--collect.info_schema.tablestats", "--collect.info_schema.tables", "--collect.info_schema.userstats", "--collect.engine_innodb_status" ]
+    ports:
+      - "9104:9104"
+    environment:
+      - DATA_SOURCE_NAME=exporter:my-secret-pw@(10.0.255.10:3306)/
+    depends_on:
+      - mysql
+      - ndb_mgmd
+      - ndb1
+      - ndb2
+      - mysqld
     logging: *logging
 
   # MySQL Management Node

@@ -2,3 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 # extra settings to be merged into OpenTelemetry Collector configuration
 # do not delete this file
+
+exporters:
+  zipkin:
+    endpoint: "http://zipkin:9411/api/v2/spans"
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces/2:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [zipkin]

@@ -12,7 +12,10 @@ x-default-logging: &logging
 networks:
   default:
     name: opentelemetry-demo
-    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "10.0.0.0/16"
 
 services:
   # ******************
@@ -33,10 +36,10 @@ services:
           memory: 20M
     restart: unless-stopped
     environment:
-      - KAFKA_SERVICE_ADDR
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES
+      - KAFKA_SERVICE_ADDR=${KAFKA_SERVICE_ADDR}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_SERVICE_NAME=accountingservice
     depends_on:
       otelcol:
@@ -62,11 +65,11 @@ services:
     ports:
       - "${AD_SERVICE_PORT}"
     environment:
-      - AD_SERVICE_PORT
-      - FEATURE_FLAG_GRPC_SERVICE_ADDR
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES
+      - AD_SERVICE_PORT=${AD_SERVICE_PORT}
+      - FEATURE_FLAG_GRPC_SERVICE_ADDR=${FEATURE_FLAG_GRPC_SERVICE_ADDR}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_LOGS_EXPORTER=otlp
       - OTEL_SERVICE_NAME=adservice
     depends_on:
@@ -90,11 +93,11 @@ services:
     ports:
       - "${CART_SERVICE_PORT}"
     environment:
-      - CART_SERVICE_PORT
-      - FEATURE_FLAG_GRPC_SERVICE_ADDR
-      - REDIS_ADDR
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_RESOURCE_ATTRIBUTES
+      - CART_SERVICE_PORT=${CART_SERVICE_PORT}
+      - FEATURE_FLAG_GRPC_SERVICE_ADDR=${FEATURE_FLAG_GRPC_SERVICE_ADDR}
+      - REDIS_ADDR=${REDIS_ADDR}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_SERVICE_NAME=cartservice
       - ASPNETCORE_URLS=http://*:${CART_SERVICE_PORT}
     depends_on:
@@ -119,17 +122,17 @@ services:
     ports:
       - "${CHECKOUT_SERVICE_PORT}"
     environment:
-      - CHECKOUT_SERVICE_PORT
-      - CART_SERVICE_ADDR
-      - CURRENCY_SERVICE_ADDR
-      - EMAIL_SERVICE_ADDR
-      - PAYMENT_SERVICE_ADDR
-      - PRODUCT_CATALOG_SERVICE_ADDR
-      - SHIPPING_SERVICE_ADDR
-      - KAFKA_SERVICE_ADDR
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES
+      - CHECKOUT_SERVICE_PORT=${CHECKOUT_SERVICE_PORT}
+      - CART_SERVICE_ADDR=${CART_SERVICE_ADDR}
+      - CURRENCY_SERVICE_ADDR=${CURRENCY_SERVICE_ADDR}
+      - EMAIL_SERVICE_ADDR=${EMAIL_SERVICE_ADDR}
+      - PAYMENT_SERVICE_ADDR=${PAYMENT_SERVICE_ADDR}
+      - PRODUCT_CATALOG_SERVICE_ADDR=${PRODUCT_CATALOG_SERVICE_ADDR}
+      - SHIPPING_SERVICE_ADDR=${SHIPPING_SERVICE_ADDR}
+      - KAFKA_SERVICE_ADDR=${KAFKA_SERVICE_ADDR}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_SERVICE_NAME=checkoutservice
     depends_on:
       cartservice:
@@ -169,8 +172,8 @@ services:
     ports:
       - "${CURRENCY_SERVICE_PORT}"
     environment:
-      - CURRENCY_SERVICE_PORT
-      - OTEL_EXPORTER_OTLP_ENDPOINT
+      - CURRENCY_SERVICE_PORT=${CURRENCY_SERVICE_PORT}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
       - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.name=currencyservice   # The C++ SDK does not support OTEL_SERVICE_NAME
     depends_on:
       - otelcol
@@ -193,9 +196,9 @@ services:
       - "${EMAIL_SERVICE_PORT}"
     environment:
       - APP_ENV=production
-      - EMAIL_SERVICE_PORT
+      - EMAIL_SERVICE_PORT=${EMAIL_SERVICE_PORT}
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:4318/v1/traces
-      - OTEL_RESOURCE_ATTRIBUTES
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_SERVICE_NAME=emailservice
     depends_on:
       - otelcol
@@ -219,9 +222,9 @@ services:
       - "${FEATURE_FLAG_SERVICE_PORT}"                                  # Feature Flag Service UI
       - "${FEATURE_FLAG_GRPC_SERVICE_PORT}"                             # Feature Flag Service gRPC API
     environment:
-      - FEATURE_FLAG_SERVICE_PORT
-      - FEATURE_FLAG_GRPC_SERVICE_PORT
-      - OTEL_EXPORTER_OTLP_ENDPOINT
+      - FEATURE_FLAG_SERVICE_PORT=${FEATURE_FLAG_SERVICE_PORT}
+      - FEATURE_FLAG_GRPC_SERVICE_PORT=${FEATURE_FLAG_GRPC_SERVICE_PORT}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
       - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
       - OTEL_SERVICE_NAME=featureflagservice
       - DATABASE_URL=ecto://ffs:ffs@ffs_postgres:5432/ffs
@@ -247,10 +250,10 @@ services:
           memory: 200M
     restart: unless-stopped
     environment:
-      - KAFKA_SERVICE_ADDR
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES
+      - KAFKA_SERVICE_ADDR=${KAFKA_SERVICE_ADDR}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_SERVICE_NAME=frauddetectionservice
     depends_on:
       otelcol:
@@ -277,20 +280,20 @@ services:
       - "${FRONTEND_PORT}"
     environment:
       - PORT=${FRONTEND_PORT}
-      - FRONTEND_ADDR
-      - AD_SERVICE_ADDR
-      - CART_SERVICE_ADDR
-      - CHECKOUT_SERVICE_ADDR
-      - CURRENCY_SERVICE_ADDR
-      - PRODUCT_CATALOG_SERVICE_ADDR
-      - RECOMMENDATION_SERVICE_ADDR
-      - SHIPPING_SERVICE_ADDR
-      - OTEL_EXPORTER_OTLP_ENDPOINT
+      - FRONTEND_ADDR=${FRONTEND_ADDR}
+      - AD_SERVICE_ADDR=${AD_SERVICE_ADDR}
+      - CART_SERVICE_ADDR=${CART_SERVICE_ADDR}
+      - CHECKOUT_SERVICE_ADDR=${CHECKOUT_SERVICE_ADDR}
+      - CURRENCY_SERVICE_ADDR=${CURRENCY_SERVICE_ADDR}
+      - PRODUCT_CATALOG_SERVICE_ADDR=${PRODUCT_CATALOG_SERVICE_ADDR}
+      - RECOMMENDATION_SERVICE_ADDR=${RECOMMENDATION_SERVICE_ADDR}
+      - SHIPPING_SERVICE_ADDR=${SHIPPING_SERVICE_ADDR}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
       - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
-      - ENV_PLATFORM
+      - ENV_PLATFORM=${ENV_PLATFORM}
       - OTEL_SERVICE_NAME=frontend
-      - PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+      - PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE}
       - WEB_OTEL_SERVICE_NAME=frontend-web
     depends_on:
       - adservice
@@ -319,53 +322,84 @@ services:
       - "${ENVOY_PORT}:${ENVOY_PORT}"
       - 10000:10000
     environment:
-      - FRONTEND_PORT
-      - FRONTEND_HOST
-      - FEATURE_FLAG_SERVICE_PORT
-      - FEATURE_FLAG_SERVICE_HOST
-      - LOCUST_WEB_HOST
-      - LOCUST_WEB_PORT
-      - GRAFANA_SERVICE_PORT
-      - GRAFANA_SERVICE_HOST
-      - JAEGER_SERVICE_PORT
-      - JAEGER_SERVICE_HOST
-      - OTEL_COLLECTOR_HOST
-      - OTEL_COLLECTOR_PORT
-      - ENVOY_PORT
+      - FRONTEND_PORT=${FRONTEND_PORT}
+      - FRONTEND_HOST=${FRONTEND_HOST}
+      - FEATURE_FLAG_SERVICE_PORT=${FEATURE_FLAG_SERVICE_PORT}
+      - FEATURE_FLAG_SERVICE_HOST=${FEATURE_FLAG_SERVICE_HOST}
+      - LOCUST_WEB_HOST=${LOCUST_WEB_HOST}
+      - LOCUST_WEB_PORT=${LOCUST_WEB_PORT}
+      - GRAFANA_SERVICE_PORT=${GRAFANA_SERVICE_PORT}
+      - GRAFANA_SERVICE_HOST=${GRAFANA_SERVICE_HOST}
+      - JAEGER_SERVICE_PORT=${JAEGER_SERVICE_PORT}
+      - JAEGER_SERVICE_HOST=${JAEGER_SERVICE_HOST}
+      - OTEL_COLLECTOR_HOST=${OTEL_COLLECTOR_HOST}
+      - OTEL_COLLECTOR_PORT=${OTEL_COLLECTOR_PORT}
+      - ENVOY_PORT=${ENVOY_PORT}
     depends_on:
       - frontend
       - featureflagservice
-      - loadgenerator
+      - loadgenerator2
       - grafana
 
   # Load Generator
-  loadgenerator:
-    image: ${IMAGE_NAME}:${IMAGE_VERSION}-loadgenerator
-    container_name: load-generator
+  # loadgenerator:
+  #   image: ${IMAGE_NAME}:${IMAGE_VERSION}-loadgenerator
+  #   container_name: load-generator
+  #   build:
+  #     context: ./
+  #     dockerfile: ./src/loadgenerator/Dockerfile
+  #     cache_from:
+  #       - ${IMAGE_NAME}:${IMAGE_VERSION}-loadgenerator
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 120M
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${LOCUST_WEB_PORT}"
+  #   environment:
+  #     - LOCUST_WEB_PORT=${LOCUST_WEB_PORT}
+  #     - LOCUST_USERS=${LOCUST_USERS}
+  #     - LOCUST_HOST=${FRONTEND_HOST}
+  #     - LOCUST_HEADLESS=${LOCUST_HEADLESS}
+  #     - LOCUST_AUTOSTART=${LOCUST_AUTOSTART}
+  #     - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:4318/v1/traces
+  #     - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
+  #     - OTEL_SERVICE_NAME=loadgenerator
+  #     - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+  #   depends_on:
+  #     - frontend
+  #   logging: *logging
+
+  # Load Generator
+  loadgenerator2:
+    image: loadgenerator2
+    container_name: load-generator2
     build:
       context: ./
-      dockerfile: ./src/loadgenerator/Dockerfile
+      dockerfile: ./src/loadgenerator2/Dockerfile
       cache_from:
-        - ${IMAGE_NAME}:${IMAGE_VERSION}-loadgenerator
+        - loadgenerator2
     deploy:
       resources:
         limits:
           memory: 120M
     restart: unless-stopped
-    ports:
-      - "${LOCUST_WEB_PORT}"
+    # ports:
+    #   - "${LOCUST_WEB_PORT}"
     environment:
-      - LOCUST_WEB_PORT
-      - LOCUST_USERS
-      - LOCUST_HOST
-      - LOCUST_HEADLESS
-      - LOCUST_AUTOSTART
+      # - LOCUST_WEB_PORT=${LOCUST_WEB_PORT}
+      # - LOCUST_USERS=${LOCUST_USERS}
+      # - LOCUST_HOST=${FRONTEND_HOST}
+      # - LOCUST_HEADLESS=${LOCUST_HEADLESS}
+      # - LOCUST_AUTOSTART=${LOCUST_AUTOSTART}
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:4318/v1/traces
-      - OTEL_RESOURCE_ATTRIBUTES
-      - OTEL_SERVICE_NAME=loadgenerator
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
+      - OTEL_SERVICE_NAME=loadgenerator2
       - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
     depends_on:
       - frontend
+      - otelcol
     logging: *logging
 
   # Payment service
@@ -385,10 +419,10 @@ services:
     ports:
       - "${PAYMENT_SERVICE_PORT}"
     environment:
-      - PAYMENT_SERVICE_PORT
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES
+      - PAYMENT_SERVICE_PORT=${PAYMENT_SERVICE_PORT}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_SERVICE_NAME=paymentservice
     depends_on:
       - otelcol
@@ -411,11 +445,11 @@ services:
     ports:
       - "${PRODUCT_CATALOG_SERVICE_PORT}"
     environment:
-      - PRODUCT_CATALOG_SERVICE_PORT
-      - FEATURE_FLAG_GRPC_SERVICE_ADDR
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES
+      - PRODUCT_CATALOG_SERVICE_PORT=${PRODUCT_CATALOG_SERVICE_PORT}
+      - FEATURE_FLAG_GRPC_SERVICE_ADDR=${FEATURE_FLAG_GRPC_SERVICE_ADDR}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_SERVICE_NAME=productcatalogservice
     depends_on:
       - otelcol
@@ -440,8 +474,8 @@ services:
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:4318
       - OTEL_PHP_AUTOLOAD_ENABLED=true
-      - QUOTE_SERVICE_PORT
-      - OTEL_RESOURCE_ATTRIBUTES
+      - QUOTE_SERVICE_PORT=${QUOTE_SERVICE_PORT}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_SERVICE_NAME=quoteservice
     depends_on:
       - otelcol
@@ -464,13 +498,13 @@ services:
     ports:
       - "${RECOMMENDATION_SERVICE_PORT}"
     environment:
-      - RECOMMENDATION_SERVICE_PORT
-      - PRODUCT_CATALOG_SERVICE_ADDR
-      - FEATURE_FLAG_GRPC_SERVICE_ADDR
+      - RECOMMENDATION_SERVICE_PORT=${RECOMMENDATION_SERVICE_PORT}
+      - PRODUCT_CATALOG_SERVICE_ADDR=${PRODUCT_CATALOG_SERVICE_ADDR}
+      - FEATURE_FLAG_GRPC_SERVICE_ADDR=${FEATURE_FLAG_GRPC_SERVICE_ADDR}
       - OTEL_PYTHON_LOG_CORRELATION=true
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_SERVICE_NAME=recommendationservice
       - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
     depends_on:
@@ -496,10 +530,10 @@ services:
     ports:
       - "${SHIPPING_SERVICE_PORT}"
     environment:
-      - SHIPPING_SERVICE_PORT
-      - QUOTE_SERVICE_ADDR
+      - SHIPPING_SERVICE_PORT=${SHIPPING_SERVICE_PORT}
+      - QUOTE_SERVICE_ADDR=${QUOTE_SERVICE_ADDR}
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:4317/v1/traces
-      - OTEL_RESOURCE_ATTRIBUTES
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_SERVICE_NAME=shippingservice
     depends_on:
       - otelcol
@@ -545,9 +579,9 @@ services:
     restart: unless-stopped
     environment:
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
       - OTEL_SERVICE_NAME=kafka
       - KAFKA_HEAP_OPTS=-Xmx200m -Xms200m
     healthcheck:
@@ -602,7 +636,7 @@ services:
 
   # Grafana
   grafana:
-    image: grafana/grafana:9.4.7
+    image: grafana/grafana:latest
     container_name: grafana
     deploy:
       resources:
@@ -611,6 +645,7 @@ services:
     volumes:
       - ./src/grafana/grafana.ini:/etc/grafana/grafana.ini
       - ./src/grafana/provisioning/:/etc/grafana/provisioning/
+      - grafana-storage:/var/lib/grafana
     ports:
       - "${GRAFANA_SERVICE_PORT}"
     logging: *logging
@@ -652,12 +687,34 @@ services:
       - --enable-feature=exemplar-storage
     volumes:
       - ./src/prometheus/prometheus-config.yaml:/etc/prometheus/prometheus-config.yaml
+      - prometheus-storage:/prometheus
     deploy:
       resources:
         limits:
           memory: 300M
     ports:
       - "${PROMETHEUS_SERVICE_PORT}:${PROMETHEUS_SERVICE_PORT}"
+    logging: *logging
+
+  # Zipkin
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    deploy:
+      resources:
+        limits:
+          memory: 750M
+    restart: unless-stopped
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem
+      - JAVA_OPTS=-Xms500m -Xmx500m -XX:+ExitOnOutOfMemoryError
+      # - MYSQL_USER=root
+      # - MYSQL_PASS=my-secret-pw
+      # - MYSQL_HOST=10.0.255.10
+    # depends_on:
+    #   - 
     logging: *logging
 
   # *****
@@ -677,7 +734,7 @@ services:
       - ./src/frontend/cypress/screenshots:/app/cypress/screenshots
     environment:
       - CYPRESS_baseUrl=http://${FRONTEND_ADDR}
-      - FRONTEND_ADDR
+      - FRONTEND_ADDR=${FRONTEND_ADDR}
       - NODE_ENV=production
     depends_on:
       - frontend
@@ -692,15 +749,15 @@ services:
       context: ./
       dockerfile: ./test/Dockerfile
     environment:
-      - AD_SERVICE_ADDR
-      - CART_SERVICE_ADDR
-      - CHECKOUT_SERVICE_ADDR
-      - CURRENCY_SERVICE_ADDR
-      - EMAIL_SERVICE_ADDR
-      - PAYMENT_SERVICE_ADDR
-      - PRODUCT_CATALOG_SERVICE_ADDR
-      - RECOMMENDATION_SERVICE_ADDR
-      - SHIPPING_SERVICE_ADDR
+      - AD_SERVICE_ADDR=${AD_SERVICE_ADDR}
+      - CART_SERVICE_ADDR=${CART_SERVICE_ADDR}
+      - CHECKOUT_SERVICE_ADDR=${CHECKOUT_SERVICE_ADDR}
+      - CURRENCY_SERVICE_ADDR=${CURRENCY_SERVICE_ADDR}
+      - EMAIL_SERVICE_ADDR=${EMAIL_SERVICE_ADDR}
+      - PAYMENT_SERVICE_ADDR=${PAYMENT_SERVICE_ADDR}
+      - PRODUCT_CATALOG_SERVICE_ADDR=${PRODUCT_CATALOG_SERVICE_ADDR}
+      - RECOMMENDATION_SERVICE_ADDR=${RECOMMENDATION_SERVICE_ADDR}
+      - SHIPPING_SERVICE_ADDR=${SHIPPING_SERVICE_ADDR}
     depends_on:
       - adservice
       - cartservice
@@ -712,3 +769,9 @@ services:
       - recommendationservice
       - shippingservice
       - quoteservice
+
+volumes:
+  grafana-storage:
+    driver: local
+  prometheus-storage:
+    driver: local

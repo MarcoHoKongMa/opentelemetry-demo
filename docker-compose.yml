@@ -309,7 +309,7 @@ services:
 
   # Frontend Proxy (Envoy)
   frontendproxy:
-    image: ${IMAGE_NAME}:${IMAGE_VERSION}-frontendproxy
+    image: frontendproxy
     container_name: frontend-proxy
     build:
       context: ./
